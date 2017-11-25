@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">Doorbell</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example settings for Notifications -->
+    <string name="pref_header_notifications">Notifications</string>
+    <string name="pref_header_general">General</string>
+    <string name="notification_channel_name">Doorbell Notifications</string>
+    <string name="notification_channel_description">Notifications from your doorbell</string>
+
+
+    <string name="login_button">Get Started</string>
+    <string name="login_summary">Register your phone number to get started</string>
+
+    <string name="sign_in_cancelled">Login cancelled</string>
+    <string name="no_internet_connection">No Internet connection available</string>
+    <string name="unknown_error">Unable to sign in</string>
+
+    <string name="login_pin">Home ID</string>
+    <string name="login_pin_description">Enter the PIN associated with your home</string>
+    <string name="save_button">Save</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="push_notification_switch">Receive push notifications</string>
+    <string name="phone_call_switch">Receive phone calls</string>
+    <string name="chime_switch">Ring doorbell chime</string>
+    <string name="preferences_overview">Notification preferences</string>
+    <string name="current_account">Logged in as</string>
+    <string name="logout_button">Log out</string>
+
+    <string name="unlock_action">Unlock Gate</string>
+
+    <string name="action_label">action</string>
+    <string name="unlock_action_id">unlockGate</string>
+</resources>
