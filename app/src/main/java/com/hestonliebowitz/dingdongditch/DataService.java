@@ -9,10 +9,14 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -53,7 +57,7 @@ public class DataService {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(LOGIN_PIN_SETTING_NAME, loginPin);
-        editor.commit();
+        editor.apply();
     }
 
     public String getRecipientPath(String id) {
@@ -84,7 +88,29 @@ public class DataService {
         String strikePath = getStrikePath();
         DatabaseReference dbRef = mDatabase.getReference().child(strikePath);
 
-        dbRef.setValue(1);
+        dbRef.setValue(1)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast toast = Toast.makeText(
+                                mContext,
+                                R.string.unlock_confirmation,
+                                Toast.LENGTH_SHORT
+                        );
+                        toast.show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast toast = Toast.makeText(
+                                mContext,
+                                R.string.unlock_failed,
+                                Toast.LENGTH_SHORT
+                        );
+                        toast.show();
+                    }
+                });
     }
 
     public DatabaseReference getPushNotifValue(String token) {
@@ -114,6 +140,7 @@ public class DataService {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(PUSH_NOTIF_TOKEN, token);
+        editor.apply();
 
         String recipientPath = getRecipientPath(token);
         DatabaseReference dbRef = mDatabase.getReference().child(recipientPath);
@@ -176,7 +203,7 @@ public class DataService {
 
         // The user-visible description of the channel.
         String description = mContext.getString(R.string.notification_channel_description);
-        int importance = NotificationManager.IMPORTANCE_MAX;
+        int importance = NotificationManager.IMPORTANCE_HIGH;
         NotificationChannel mChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance);
 
         // Configure the notification channel.

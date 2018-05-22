@@ -32,4 +32,6 @@
 
     <string name="action_label">action</string>
     <string name="unlock_action_id">unlockGate</string>
+    <string name="unlock_confirmation">Gate unlocked</string>
+    <string name="unlock_failed">Could not unlock gate</string>
 </resources>
