@@ -10,8 +10,8 @@
     <string name="notification_channel_description">Notifications from your doorbell</string>
 
 
-    <string name="login_button">Get Started</string>
-    <string name="login_summary">Register your phone number to get started</string>
+    <string name="login_button">Sign In</string>
+    <string name="login_summary">Register your phone number to continue</string>
 
     <string name="sign_in_cancelled">Login cancelled</string>
     <string name="no_internet_connection">No Internet connection available</string>
@@ -34,4 +34,16 @@
     <string name="unlock_action_id">unlockGate</string>
     <string name="unlock_confirmation">Gate unlocked</string>
     <string name="unlock_failed">Could not unlock gate</string>
+    <string name="title_activity_setup">SetupActivity</string>
+
+    <string name="firebase_pref_app_id">firebaseAppId</string>
+    <string name="firebase_pref_api_key">firebaseApiKey</string>
+    <string name="firebase_pref_database_url">firebaseDatabaseUrl</string>
+    <string name="firebase_pref_storage_bucket">firebaseStorageBucket</string>
+
+    <string name="firebase_init_error">Error starting Firebase</string>
+    <string name="setup_summary">To get started, select the “google-services.json” config file corresponding to your Firebase app.\n<a href="https://support.google.com/firebase/answer/7015592?hl=en">Learn more</a></string>
+    <string name="setup_button">Select Config File</string>
+
+    <string name="toolbar_action_reset">Reset config</string>
 </resources>

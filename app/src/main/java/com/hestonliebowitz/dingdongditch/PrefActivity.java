@@ -1,38 +1,29 @@
 package com.hestonliebowitz.dingdongditch;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.iid.FirebaseInstanceId;
-
-import org.w3c.dom.Text;
 
 interface DialogTextInput {
     public void onDialogInputChanged(int id, View view);
@@ -116,6 +107,8 @@ public class PrefActivity extends AppCompatActivity implements DialogTextInput {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pref);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.app_toolbar);
+        setSupportActionBar(toolbar);
 
         mData = new DataService(this);
         mDatabase = FirebaseDatabase.getInstance();
@@ -167,13 +160,30 @@ public class PrefActivity extends AppCompatActivity implements DialogTextInput {
         });
 
         ensureLoginPin();
-        bindPhoneCallValue();
-        bindPushNotifValue();
-        bindChimeValue();
+        bindDbListeners();
         setCurrentAccount();
         setLoginPinView();
         mData.setupPushNotif();
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.toolbar, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_reset:
+                FirebaseInit.reset(this);
+                return true;
+            default:
+                return true;
+        }
+    }
+
 
     private void setCurrentAccount() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -188,7 +198,7 @@ public class PrefActivity extends AppCompatActivity implements DialogTextInput {
     private void logOut() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         auth.signOut();
-        startActivity(new Intent(this, MainActivity.class));
+        startActivity(new Intent(this, LoginActivity.class));
         finish();
     }
 
@@ -208,8 +218,7 @@ public class PrefActivity extends AppCompatActivity implements DialogTextInput {
             mData.setLoginPin(loginPin);
 
             setLoginPinView();
-            bindPhoneCallValue();
-            bindPushNotifValue();
+            bindDbListeners();
         }
     }
 
@@ -309,5 +318,11 @@ public class PrefActivity extends AppCompatActivity implements DialogTextInput {
                 Log.w(TAG, "bindChimeValue:onCancelled", databaseError.toException());
             }
         });
+    }
+
+    private void bindDbListeners() {
+        bindChimeValue();
+        bindPhoneCallValue();
+        bindPushNotifValue();
     }
 }
