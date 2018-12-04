@@ -27,6 +27,7 @@
     <string name="preferences_overview">Notification preferences</string>
     <string name="current_account">Logged in as</string>
     <string name="logout_button">Log out</string>
+    <string name="last_seen">Last check in</string>
 
     <string name="unlock_action">Unlock Gate</string>
 
@@ -46,4 +47,5 @@
     <string name="setup_button">Select Config File</string>
 
     <string name="toolbar_action_reset">Reset config</string>
+    <string name="unknown">Unknown</string>
 </resources>

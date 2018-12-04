@@ -41,7 +41,7 @@ public class MessageService extends FirebaseMessagingService {
      * @param messageBody FCM message body received.
      */
     private void sendNotification(String messageTitle, String messageBody) {
-        Intent mainIntent = new Intent(this, LoginActivity.class);
+        Intent mainIntent = new Intent(this, MainActivity.class);
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent mainPendingIntent = PendingIntent.getActivity(
                 this,

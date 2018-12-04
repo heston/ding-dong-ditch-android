@@ -25,6 +25,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 interface DialogTextInput {
     public void onDialogInputChanged(int id, View view);
     public String getDialogInitialValue(int id);
@@ -40,6 +44,7 @@ public class PrefActivity extends AppCompatActivity implements DialogTextInput {
     private Button unlockButton;
     private Button logOutButton;
     private View setLoginPinView;
+    private TextView lastSeen;
     private DataService mData;
 
     private static int LOGIN_PIN_ID = 101;
@@ -158,6 +163,8 @@ public class PrefActivity extends AppCompatActivity implements DialogTextInput {
                 logOut();
             }
         });
+
+        lastSeen = (TextView) findViewById(R.id.last_seen);
 
         ensureLoginPin();
         bindDbListeners();
@@ -320,9 +327,44 @@ public class PrefActivity extends AppCompatActivity implements DialogTextInput {
         });
     }
 
+    private void bindLastSeenValue() {
+        DatabaseReference dbRef = mData.getLastUpdatedAtValue();
+        if (dbRef == null) {
+            return;
+        }
+
+        dbRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Float snapshot = dataSnapshot.getValue(Float.class);
+                Log.i(TAG, String.format("bindLastSeenValue:onDataChange:%s", snapshot));
+                String formattedDate;
+
+                if (snapshot == null) {
+                    formattedDate = getResources().getString(R.string.unknown);
+                } else {
+                    String dateTimeFormat = "EEE, MMM d, h:mm a";
+                    SimpleDateFormat dateFormat = new SimpleDateFormat(dateTimeFormat);
+                    snapshot *= 1000;
+                    Long timestamp = snapshot.longValue();
+                    formattedDate = dateFormat.format(new Date(timestamp));
+                }
+
+                lastSeen.setText(formattedDate);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                lastSeen.setText(R.string.unknown);
+                Log.w(TAG, "bindLastSeenValue:onCancelled", databaseError.toException());
+            }
+        });
+    }
+
     private void bindDbListeners() {
         bindChimeValue();
         bindPhoneCallValue();
         bindPushNotifValue();
+        bindLastSeenValue();
     }
 }

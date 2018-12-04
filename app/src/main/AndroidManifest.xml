@@ -58,7 +58,7 @@
             android:name=".FirebaseContentProvider"
             android:authorities="com.hestonliebowitz.dingdongditch.firebaseprovider"
             android:enabled="true"
-            android:exported="true"></provider>
+            android:exported="true" />
     </application>
 
 </manifest>

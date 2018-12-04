@@ -2,28 +2,20 @@ package com.hestonliebowitz.dingdongditch;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.Service;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 public class DataService {
@@ -31,9 +23,11 @@ public class DataService {
     public static String LOGIN_PIN_SETTING_NAME = "loginPin";
     public static String PUSH_NOTIF_TOKEN = "pushNotifToken";
     private static String SETTINGS_BASE_PATH = "/settings/%s";
+    private static String SYSTEM_SETTINGS_BASE_PATH = "/systemSettings";
     private static String RECIPIENTS_PATH = "/recipients";
     private static String STRIKE_PATH = "/strike";
     private static String CHIME_PATH = "/chime";
+    private static String LAST_UPDATED_PATH = "/lastSeenAt";
     public static String NOTIFICATION_CHANNEL_ID = "dingdongditch_alerts";
     private static long VIBRATION_SHORT = 100;
     private static long VIBRATION_LONG = 400;
@@ -84,6 +78,10 @@ public class DataService {
         return String.format(SETTINGS_BASE_PATH + CHIME_PATH, loginPin);
     }
 
+    private String getLastUpdatedPath() {
+        return SYSTEM_SETTINGS_BASE_PATH + LAST_UPDATED_PATH;
+    }
+
     public void unlockGate() {
         String strikePath = getStrikePath();
         DatabaseReference dbRef = mDatabase.getReference().child(strikePath);
@@ -111,6 +109,12 @@ public class DataService {
                         toast.show();
                     }
                 });
+    }
+
+    public DatabaseReference getLastUpdatedAtValue() {
+        String lastUpdatedPath = getLastUpdatedPath();
+
+        return mDatabase.getReference().child(lastUpdatedPath);
     }
 
     public DatabaseReference getPushNotifValue(String token) {
