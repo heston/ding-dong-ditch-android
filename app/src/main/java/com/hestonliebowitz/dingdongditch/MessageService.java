@@ -3,6 +3,7 @@ package com.hestonliebowitz.dingdongditch;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -93,7 +94,10 @@ public class MessageService extends FirebaseMessagingService {
                 getString(R.string.unlock_action),
                 unlockPendingIntent
         );
-        Uri sound = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.doorbell);
+        Uri sound = Uri.parse(
+                ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                        getPackageName() + "/" + R.raw.doorbell
+        );
         return new NotificationCompat.Builder(this, DataService.NOTIFICATION_CHANNEL_ID)
                         .setSmallIcon(R.drawable.ic_notifications_active_black_24dp)
                         .setAutoCancel(true)
