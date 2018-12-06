@@ -48,4 +48,6 @@
 
     <string name="toolbar_action_reset">Reset config</string>
     <string name="unknown">Unknown</string>
+    <string name="title_activity_notification">Doorbell</string>
+    <string name="occurred_on">Occurred on</string>
 </resources>

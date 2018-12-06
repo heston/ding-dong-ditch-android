@@ -4,6 +4,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -17,6 +19,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class DataService {
     public static String TAG = "DataService";
@@ -32,6 +39,10 @@ public class DataService {
     private static long VIBRATION_SHORT = 100;
     private static long VIBRATION_LONG = 400;
     private static long VIBRATION_PAUSE = 100;
+    private static String EVENTS_ROOT = "events";
+    private static long MAX_IMAGE_SIZE = 1024 * 1024 * 2;  // 2 MB
+    private static long IMAGE_FETCH_RETRIES = 3;
+    private static long IMAGE_FETCH_RETRY_DELAY = 500;  // milliseconds
 
     private FirebaseDatabase mDatabase;
     private Context mContext;
@@ -81,6 +92,15 @@ public class DataService {
     private String getLastUpdatedPath() {
         return SYSTEM_SETTINGS_BASE_PATH + LAST_UPDATED_PATH;
     }
+
+    private String getEventPath(String eventId) {
+        String loginPin = getLoginPin();
+        if(loginPin.isEmpty() || eventId.isEmpty()) {
+            return null;
+        }
+        return String.format("/" + EVENTS_ROOT + "/%s/%s", loginPin, eventId);
+    }
+
 
     public void unlockGate() {
         String strikePath = getStrikePath();
@@ -198,6 +218,16 @@ public class DataService {
         dbRef.setValue(b ? 1 : null);
     }
 
+    public DatabaseReference getEvent(String eventId) {
+        String eventPath = getEventPath(eventId);
+
+        if (eventPath == null) {
+            return null;
+        }
+
+        return mDatabase.getReference().child(eventPath);
+    }
+
     public void setupPushNotif() {
         NotificationManager mNotificationManager =
                 (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -233,5 +263,54 @@ public class DataService {
                 VIBRATION_LONG,  VIBRATION_PAUSE,
         });
         mNotificationManager.createNotificationChannel(mChannel);
+    }
+
+    public void getImage(String eventId, final OnSuccessListener<Bitmap> success, final OnFailureListener failure) {
+        getImage(eventId, success, failure, IMAGE_FETCH_RETRIES);
+    }
+
+    private void getImage(final String eventId, final OnSuccessListener<Bitmap> success, final OnFailureListener failure, long tries) {
+        if (tries == 0) {
+            Exception e = new RuntimeException("Max retries exceeded");
+            failure.onFailure(e);
+            return;
+        }
+
+        String loginPin = getLoginPin();
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        final long triesRemaining = tries - 1;
+
+        StorageReference storageRef = storage
+                .getReference(EVENTS_ROOT)
+                .child(loginPin)
+                .child(String.format("%s.jpg", eventId));
+
+        storageRef.getBytes(MAX_IMAGE_SIZE)
+                .addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        success.onSuccess(bitmap);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        try {
+                            long wait = IMAGE_FETCH_RETRY_DELAY * (IMAGE_FETCH_RETRIES - triesRemaining);
+                            Thread.sleep(wait);
+                        } catch (InterruptedException e1) { }
+
+                        getImage(eventId, success, failure, triesRemaining);
+                    }
+                });
+    }
+
+    public static String formatTimestamp(Float timestamp) {
+        String dateTimeFormat = "EEEE, MMM d, h:mm a";
+        SimpleDateFormat dateFormat = new SimpleDateFormat(dateTimeFormat);
+        timestamp *= 1000;
+        Long longTimestamp = timestamp.longValue();
+        return dateFormat.format(new Date(longTimestamp));
     }
 }

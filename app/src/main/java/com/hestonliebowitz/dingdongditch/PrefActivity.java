@@ -186,11 +186,9 @@ public class PrefActivity extends AppCompatActivity implements DialogTextInput {
             case R.id.action_reset:
                 FirebaseInit.reset(this);
                 return true;
-            default:
-                return true;
         }
+        return super.onOptionsItemSelected(item);
     }
-
 
     private void setCurrentAccount() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -343,11 +341,7 @@ public class PrefActivity extends AppCompatActivity implements DialogTextInput {
                 if (snapshot == null) {
                     formattedDate = getResources().getString(R.string.unknown);
                 } else {
-                    String dateTimeFormat = "EEE, MMM d, h:mm a";
-                    SimpleDateFormat dateFormat = new SimpleDateFormat(dateTimeFormat);
-                    snapshot *= 1000;
-                    Long timestamp = snapshot.longValue();
-                    formattedDate = dateFormat.format(new Date(timestamp));
+                    formattedDate = DataService.formatTimestamp(snapshot);
                 }
 
                 lastSeen.setText(formattedDate);
