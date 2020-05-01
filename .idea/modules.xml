@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/DingDongDitch.iml" filepath="$PROJECT_DIR$/DingDongDitch.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ding-dong-ditch-android.iml" filepath="$PROJECT_DIR$/ding-dong-ditch-android.iml" group="ding-dong-ditch-android" />
+      <module fileurl="file://$PROJECT_DIR$/app/ding-dong-ditch-android-app.iml" filepath="$PROJECT_DIR$/app/ding-dong-ditch-android-app.iml" group="ding-dong-ditch-android/app" />
     </modules>
   </component>
 </project>
