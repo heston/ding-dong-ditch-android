@@ -23,11 +23,12 @@
     <string name="cancel_button">Cancel</string>
     <string name="push_notification_switch">Receive push notifications</string>
     <string name="phone_call_switch">Receive phone calls</string>
+    <string name="sms_switch">Receive SMS messages</string>
     <string name="chime_switch">Ring doorbell chime</string>
     <string name="preferences_overview">Notification preferences</string>
     <string name="current_account">Logged in as</string>
     <string name="logout_button">Log out</string>
-    <string name="last_seen">Last check in</string>
+    <string name="last_seen">Last sync</string>
 
     <string name="unlock_action">Unlock Gate</string>
 

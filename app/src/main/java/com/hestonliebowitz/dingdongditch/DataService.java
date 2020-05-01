@@ -43,6 +43,12 @@ public class DataService {
     private static long MAX_IMAGE_SIZE = 1024 * 1024 * 2;  // 2 MB
     private static long IMAGE_FETCH_RETRIES = 3;
     private static long IMAGE_FETCH_RETRY_DELAY = 500;  // milliseconds
+    private static String PHONE_POSTFIX = "p";
+    private static String SMS_POSTFIX = "s";
+    public static long RECIPIENT_TYPE_PHONE = 1;
+    public static long RECIPIENT_TYPE_SMS = 2;
+    public static long RECIPIENT_TYPE_PUSH = 3;
+    private static long FLAG_ENABLED = 1;
 
     private FirebaseDatabase mDatabase;
     private Context mContext;
@@ -71,6 +77,10 @@ public class DataService {
             return null;
         }
         return String.format(SETTINGS_BASE_PATH + RECIPIENTS_PATH + "/%s", loginPin, id);
+    }
+
+    public String getRecipientPath(String id, String type) {
+        return getRecipientPath(id + "::" + type);
     }
 
     private String getStrikePath() {
@@ -106,7 +116,7 @@ public class DataService {
         String strikePath = getStrikePath();
         DatabaseReference dbRef = mDatabase.getReference().child(strikePath);
 
-        dbRef.setValue(1)
+        dbRef.setValue(FLAG_ENABLED)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -169,7 +179,7 @@ public class DataService {
         String recipientPath = getRecipientPath(token);
         DatabaseReference dbRef = mDatabase.getReference().child(recipientPath);
 
-        dbRef.setValue(b ? 2 : null);
+        dbRef.setValue(b ? RECIPIENT_TYPE_PUSH : null);
     }
 
     public DatabaseReference getChimeValue() {
@@ -187,17 +197,24 @@ public class DataService {
 
         DatabaseReference dbRef = mDatabase.getReference().child(chimePath);
 
-        dbRef.setValue(b ? 1 : 0);
+        dbRef.setValue(b ? FLAG_ENABLED : 0);
     }
 
-    public DatabaseReference getPhoneCallValue() {
+    private String getCurrentPhoneNumber() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
             return null;
         }
-        String phone = user.getPhoneNumber();
-        String recipientPath = getRecipientPath(phone);
+        return user.getPhoneNumber();
+    }
+
+    public DatabaseReference getPhoneCallValue() {
+        String phone = getCurrentPhoneNumber();
+        if (phone == null) {
+            return null;
+        }
+        String recipientPath = getRecipientPath(phone, PHONE_POSTFIX);
         if (recipientPath == null) {
             return null;
         }
@@ -206,16 +223,38 @@ public class DataService {
     }
 
     public void setPhoneCallValue(boolean b) {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        FirebaseUser user = auth.getCurrentUser();
-        if (user == null) {
+        String phone = getCurrentPhoneNumber();
+        if (phone == null) {
             return;
         }
-        String phone = user.getPhoneNumber();
-        String recipientPath = getRecipientPath(phone);
+        String recipientPath = getRecipientPath(phone, PHONE_POSTFIX);
         DatabaseReference dbRef = mDatabase.getReference().child(recipientPath);
 
-        dbRef.setValue(b ? 1 : null);
+        dbRef.setValue(b ? RECIPIENT_TYPE_PHONE : null);
+    }
+
+    public DatabaseReference getSmsValue() {
+       String phone = getCurrentPhoneNumber();
+        if (phone == null) {
+            return null;
+        }
+        String recipientPath = getRecipientPath(phone, SMS_POSTFIX);
+        if (recipientPath == null) {
+            return null;
+        }
+
+        return mDatabase.getReference().child(recipientPath);
+    }
+
+    public void setSmsValue(boolean b) {
+        String phone = getCurrentPhoneNumber();
+        if (phone == null) {
+            return;
+        }
+        String recipientPath = getRecipientPath(phone, SMS_POSTFIX);
+        DatabaseReference dbRef = mDatabase.getReference().child(recipientPath);
+
+        dbRef.setValue(b ? RECIPIENT_TYPE_SMS : null);
     }
 
     public DatabaseReference getEvent(String eventId) {

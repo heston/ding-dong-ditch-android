@@ -25,10 +25,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 interface DialogTextInput {
     public void onDialogInputChanged(int id, View view);
     public String getDialogInitialValue(int id);
@@ -39,6 +35,7 @@ public class PrefActivity extends AppCompatActivity implements DialogTextInput {
 
     private FirebaseDatabase mDatabase;
     private Switch pushNotifSwitch;
+    private Switch smsSwitch;
     private Switch phoneCallSwitch;
     private Switch chimeSwitch;
     private Button unlockButton;
@@ -136,6 +133,15 @@ public class PrefActivity extends AppCompatActivity implements DialogTextInput {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 mData.setPushNotifValue(b);
+            }
+        });
+
+        smsSwitch = (Switch) findViewById(R.id.sms_switch);
+        smsSwitch.setEnabled(false);
+        smsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                mData.setSmsValue(b);
             }
         });
 
@@ -253,7 +259,7 @@ public class PrefActivity extends AppCompatActivity implements DialogTextInput {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Long snapshot = dataSnapshot.getValue(Long.class);
-                Boolean switchValue = snapshot != null && snapshot == 1;
+                Boolean switchValue = snapshot != null && snapshot == DataService.RECIPIENT_TYPE_PHONE;
 
                 Log.i(TAG, String.format("bindPhoneCallValue:onDataChange:%s", switchValue));
                 phoneCallSwitch.setChecked(switchValue);
@@ -281,7 +287,7 @@ public class PrefActivity extends AppCompatActivity implements DialogTextInput {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Long snapshot = dataSnapshot.getValue(Long.class);
-                Boolean switchValue = snapshot != null && snapshot == 2;
+                Boolean switchValue = snapshot != null && snapshot == DataService.RECIPIENT_TYPE_PUSH;
 
                 Log.i(TAG, String.format("bindPushNotifValue:onDataChange:%s", switchValue));
                 pushNotifSwitch.setChecked(switchValue);
@@ -294,6 +300,33 @@ public class PrefActivity extends AppCompatActivity implements DialogTextInput {
             public void onCancelled(DatabaseError databaseError) {
                 pushNotifSwitch.setChecked(false);
                 Log.w(TAG, "bindPushNotifValue:onCancelled", databaseError.toException());
+            }
+        });
+    }
+
+    private void bindSmsValue() {
+        DatabaseReference dbRef = mData.getSmsValue();
+        if (dbRef == null) {
+            return;
+        }
+
+        dbRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Long snapshot = dataSnapshot.getValue(Long.class);
+                Boolean switchValue = snapshot != null && snapshot == DataService.RECIPIENT_TYPE_SMS;
+
+                Log.i(TAG, String.format("bindSmsValue:onDataChange:%s", switchValue));
+                smsSwitch.setChecked(switchValue);
+                if (!smsSwitch.isEnabled()) {
+                    smsSwitch.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                smsSwitch.setChecked(false);
+                Log.w(TAG, "bindSmsValue:onCancelled:%s", databaseError.toException());
             }
         });
     }
@@ -358,6 +391,7 @@ public class PrefActivity extends AppCompatActivity implements DialogTextInput {
     private void bindDbListeners() {
         bindChimeValue();
         bindPhoneCallValue();
+        bindSmsValue();
         bindPushNotifValue();
         bindLastSeenValue();
     }
