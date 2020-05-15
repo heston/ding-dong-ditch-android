@@ -38,7 +38,7 @@ public class LoginActivity extends AppCompatActivity {
                                     .createSignInIntentBuilder()
                                     .setAvailableProviders(
                                             Arrays.asList(
-                                                    new AuthUI.IdpConfig.Builder(AuthUI.PHONE_VERIFICATION_PROVIDER).build()
+                                                    new AuthUI.IdpConfig.PhoneBuilder().build()
                                             )
                                     )
                                     .build(),
@@ -79,7 +79,7 @@ public class LoginActivity extends AppCompatActivity {
             } else {
                 // Sign in failed
                 if (response != null) {
-                    int errCode = response.getErrorCode();
+                    int errCode = response.getError().getErrorCode();
                     switch (errCode) {
                         case ErrorCodes.NO_NETWORK:
                             Toast
